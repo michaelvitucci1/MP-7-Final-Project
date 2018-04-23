@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">MP&amp;</string>
+    <string name="title_activity_maps">Map</string>
+    
+    <string-array name="mapTypes">
+        <item>Standard</item>
+        <item>Satellite</item>
+        <item>Hybrid</item>
+    </string-array>
+</resources>
