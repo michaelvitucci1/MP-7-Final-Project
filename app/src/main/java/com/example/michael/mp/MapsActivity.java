@@ -1,18 +1,24 @@
 package com.example.michael.mp;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApi;
@@ -23,13 +29,19 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         LocationListener {
 
+    private static final int MY_REQUEST_INT = 177;
     private GoogleMap mMap;
+
+    private boolean mLocationPermissionGranted = false;
+    private Object mLastKnownLocation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,30 +66,45 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        mMap.setMapType(3);
-        // Add a marker in Champaign, IL and move the camera
 
+        // Create spinner (dropdown menu) for the map type
         Spinner mapTypes = (Spinner) findViewById(R.id.spinner3);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
                 R.array.mapTypes, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mapTypes.setAdapter(adapter);
-
-        Button mapType = findViewById(R.id.mapType);
-        mapType.setOnClickListener(new View.OnClickListener() {
+        mapTypes.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
-            public void onClick(View v) {
-                setMapType();
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                setMapType(position);
+                Toast.makeText(getBaseContext(),
+                        parent.getItemAtPosition(position) + " selected",
+                        Toast.LENGTH_LONG).show();
+                }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
             }
         });
 
+
+//        // create a button to set the map type to satellite
+//        Button mapType = findViewById(R.id.mapType);
+//        mapType.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                setMapType(2);
+//            }
+//        });
+
+
+        //  Create a button to set the location
         Button location = findViewById(R.id.yourLocation);
         location.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                LatLng champaign = new LatLng(40, -88);
-                mMap.addMarker(new MarkerOptions().position(champaign).title("You are in Champaign, IL"));
-                mMap.moveCamera(CameraUpdateFactory.newLatLng(champaign));
+                setMapType(2);
             }
         });
     }
@@ -161,7 +188,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
-    public void setMapType () {
-        mMap.setMapType(2);
+    public GoogleMap getmMap() {
+        return mMap;
+    }
+
+    private void setMapType (int type) {
+        if (type == 1) {
+            mMap.setMapType(2);
+        } else if (type == 2) {
+            mMap.setMapType(3);
+        } else {
+            mMap.setMapType(1);
+        }
     }
 }
